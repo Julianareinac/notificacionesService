@@ -6,6 +6,8 @@ from email.mime.text import MIMEText
 from flask import Flask, jsonify, request
 import threading
 import uuid
+from datetime import datetime
+from health import health_bp 
 
 app = Flask(__name__)
 
@@ -156,6 +158,15 @@ def obtener_notificacion(notificacion_id):
     if notificacion:
         return jsonify(notificacion), 200
     return jsonify({"error": "Notificación no encontrada"}), 404
+
+
+# Tiempo de inicio del servicio
+start_time = datetime.now()
+service_version = "1.0.0"
+
+# Registrar los endpoints de salud
+app.register_blueprint(health_bp)
+
 
 if __name__ == "__main__":
     threading.Thread(target=consumir_mensajes).start()  # Iniciar consumidor de mensajes asincrónico
