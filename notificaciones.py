@@ -205,4 +205,4 @@ app.register_blueprint(health_bp)
 
 if __name__ == "__main__":
     threading.Thread(target=consumir_mensajes).start()  # Iniciar consumidor de mensajes asincrónico
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
