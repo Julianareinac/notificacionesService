@@ -1,0 +1,174 @@
+openapi: 3.0.0
+info:
+  title: Servicio de Notificaciones
+  version: "1.0.0"
+  description: Servicio para gestionar notificaciones por correo electrónico y otros canales, con integración a RabbitMQ y base de datos PostgreSQL.
+
+servers:
+  - url: "http://localhost:5000"
+    description: "Servidor local"
+
+paths:
+  /notificaciones:
+    post:
+      summary: "Crear una nueva notificación"
+      description: "Crea una notificación, enviándola de manera sincrónica o asincrónica."
+      operationId: "crearNotificacion"
+      requestBody:
+        description: "Datos necesarios para crear una notificación"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destinatario:
+                  type: string
+                  example: "usuario@dominio.com"
+                  description: "Correo electrónico del destinatario"
+                canales:
+                  type: array
+                  items:
+                    type: string
+                    example: "email"
+                  description: "Lista de canales a los que se enviará la notificación (por ejemplo, email)"
+                mensaje:
+                  type: string
+                  example: "Este es el mensaje de la notificación."
+                  description: "El mensaje que se enviará al destinatario"
+                modo:
+                  type: string
+                  enum: [sync, async]
+                  default: "async"
+                  description: "Modo de envío de la notificación (sincrónico o asincrónico)"
+      responses:
+        '200':
+          description: "Notificación creada con éxito"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  notificacion_id:
+                    type: string
+                    example: "enviando en modo asíncrono"
+        '400':
+          description: "Solicitud inválida"
+        '500':
+          description: "Error en el servidor"
+
+    get:
+      summary: "Obtener todas las notificaciones"
+      description: "Recupera todas las notificaciones registradas en la base de datos."
+      operationId: "obtenerNotificaciones"
+      responses:
+        '200':
+          description: "Lista de notificaciones"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "d2c2fbb9-cb1b-4b25-8c6a-53044a4b7edb"
+                    destinatario:
+                      type: string
+                      example: "usuario@dominio.com"
+                    canales:
+                      type: string
+                      example: "email"
+                    mensaje:
+                      type: string
+                      example: "Este es el mensaje de la notificación."
+                    resultado:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: "E-Mail enviado"
+                    fecha:
+                      type: string
+                      format: date-time
+                      example: "2024-11-14T15:00:00"
+        '500':
+          description: "Error al recuperar las notificaciones"
+
+  /notificaciones/{notificacion_id}:
+    get:
+      summary: "Obtener detalles de una notificación específica"
+      description: "Recupera los detalles de una notificación específica mediante su ID."
+      operationId: "obtenerNotificacion"
+      parameters:
+        - name: "notificacion_id"
+          in: "path"
+          required: true
+          schema:
+            type: string
+          description: "ID de la notificación a obtener"
+      responses:
+        '200':
+          description: "Detalles de la notificación"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "d2c2fbb9-cb1b-4b25-8c6a-53044a4b7edb"
+                  destinatario:
+                    type: string
+                    example: "usuario@dominio.com"
+                  canales:
+                    type: string
+                    example: "email"
+                  mensaje:
+                    type: string
+                    example: "Este es el mensaje de la notificación."
+                  resultado:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "E-Mail enviado"
+                  fecha:
+                    type: string
+                    format: date-time
+                    example: "2024-11-14T15:00:00"
+        '404':
+          description: "Notificación no encontrada"
+        '500':
+          description: "Error en el servidor"
+
+components:
+  schemas:
+    Notificacion:
+      type: object
+      properties:
+        destinatario:
+          type: string
+          example: "usuario@dominio.com"
+        canales:
+          type: array
+          items:
+            type: string
+            example: "email"
+        mensaje:
+          type: string
+          example: "Este es el mensaje de la notificación."
+        modo:
+          type: string
+          enum: [sync, async]
+          default: "async"
+    Resultado:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "E-Mail enviado"
